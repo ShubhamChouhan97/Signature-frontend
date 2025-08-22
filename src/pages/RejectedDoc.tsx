@@ -18,6 +18,8 @@ const RejecedDoc: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [tablehead, setTablehead] = useState<string[]>([]);
   const [tabledata, setTabledata] = useState<RequestDataRow[]>([]);
+  // const [requestStatus, setRequestStatus] = useState<string | null>(null);
+  // const [bulkdataId, setBulkdataId] = useState<string | null>(null);
 
   const getRequestId = (): string => {
     const pathSegments = location.pathname.split("/");
@@ -29,7 +31,7 @@ const RejecedDoc: React.FC = () => {
     try {
       const [header, status] = await fetchTableHeadAndStatus(requestId);
       setTablehead(header);
-      setRequestStatus(status);
+      // setRequestStatus(status);
     } catch {
       message.error("Failed to fetch request details.");
     }
@@ -39,7 +41,7 @@ const RejecedDoc: React.FC = () => {
     const requestId = getRequestId();
     try {
       const [tableData, bulkId] = await fetchTableDataAndBulkId(requestId);
-      setBulkdataId(bulkId);
+      // setBulkdataId(bulkId);
       setTabledata(tableData);
     } catch {
       message.error("Failed to fetch table data.");
