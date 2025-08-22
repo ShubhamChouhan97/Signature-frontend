@@ -1,12 +1,11 @@
-
 // version 2
 
 import React, { useRef, useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { useAppStore } from "../store"; // Keep useAppStore for session
-import { rolesMap } from '../libs/statusMap';
+import { rolesMap } from "../libs/statusMap";
 import { Modal, Input, message, Spin } from "antd"; // Ensure Spin is imported
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
 // Import your API functions
 import {
@@ -17,12 +16,11 @@ import {
   previewRequestDocument,
   deleteRequestDocument,
   rejectRequestDocumentByOfficer,
-} from '../Api/requestPageApi'; // Adjust path as needed
+} from "../Api/requestPageApi"; // Adjust path as needed
 
 const socket = io("https://signature-backend-79t1.onrender.com", {
-  withCredentials: true
+  withCredentials: true,
 });
-
 
 export default function RequestPage() {
   const location = useLocation();
@@ -32,17 +30,23 @@ export default function RequestPage() {
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
-const [loadvar, setLoadvar] = useState(0);
-  interface RequestDataRow { // Renamed for clarity, was 'Request' in original but used for table rows
+  const [loadvar, setLoadvar] = useState(0);
+  interface RequestDataRow {
+    // Renamed for clarity, was 'Request' in original but used for table rows
     [key: string]: unknown;
     signDate?: string;
     status?: string; // Add status to the interface
     Rejectreason?: string; // Add Rejectreason for tooltip
   }
 
-  const session = useAppStore().session
+  const session = useAppStore().session;
   const myId = useAppStore().session?.userId;
-  const userRole = session?.role === 2 ? rolesMap[2] : session?.role === 3 ? rolesMap[3] : null;
+  const userRole =
+    session?.role === 2
+      ? rolesMap[2]
+      : session?.role === 3
+        ? rolesMap[3]
+        : null;
 
   const [tablehead, settablehead] = useState<string[]>([]); // Changed to string[] based on usage
   const [tabledata, settabledata] = useState<RequestDataRow[]>([]);
@@ -53,17 +57,17 @@ const [loadvar, setLoadvar] = useState(0);
     return pathSegments[pathSegments.length - 1];
   };
 
-   useEffect(() => {
-      socket.on('request-reader', (data) => {
-        if (myId === data.readerId) {
-          setLoadvar((prev) => prev + 1);
-        }
-      });
-  
-      return () => {
-        socket.off('request-reader');
-      };
-    }, [myId]);
+  useEffect(() => {
+    socket.on("request-reader", (data) => {
+      if (myId === data.readerId) {
+        setLoadvar((prev) => prev + 1);
+      }
+    });
+
+    return () => {
+      socket.off("request-reader");
+    };
+  }, [myId]);
 
   const fetchData = async () => {
     const requestId = getRequestId();
@@ -96,7 +100,7 @@ const [loadvar, setLoadvar] = useState(0);
       }
     } catch (error: any) {
       // An actual error occurred during the API call
-     // message.error(error.message || "Failed to fetch table data due to an error.");
+      // message.error(error.message || "Failed to fetch table data due to an error.");
       settabledata([]); // Clear table data on error
       setBulkdataId(null);
     } finally {
@@ -106,16 +110,14 @@ const [loadvar, setLoadvar] = useState(0);
 
   useEffect(() => {
     fetchTableContent();
-  }, [loadvar]); 
+  }, [loadvar]);
 
   // ---
 
-
   useEffect(() => {
-    if (!loading && (tabledata.length === 0 && requestStatus !== null)) {
+    if (!loading && tabledata.length === 0 && requestStatus !== null) {
     }
   }, [tabledata.length, requestStatus]);
-
 
   const handleDownloadExcelTemplate = async () => {
     const requestId = getRequestId();
@@ -143,13 +145,15 @@ const [loadvar, setLoadvar] = useState(0);
     }
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     const validExtensions = [".xls", ".xlsx", ".csv"];
     const fileName = file.name.toLowerCase();
-    const isValidFile = validExtensions.some(ext => fileName.endsWith(ext));
+    const isValidFile = validExtensions.some((ext) => fileName.endsWith(ext));
 
     if (!isValidFile) {
       message.error("Please upload a valid .xls, .xlsx, or .csv file.");
@@ -176,7 +180,12 @@ const [loadvar, setLoadvar] = useState(0);
     setLoading(true);
 
     try {
-      const blob = await previewRequestDocument(requestId, rowId, bulkdataId, myId);
+      const blob = await previewRequestDocument(
+        requestId,
+        rowId,
+        bulkdataId,
+        myId
+      );
       const fileURL = window.URL.createObjectURL(blob);
       window.open(fileURL, "_blank");
     } catch {
@@ -191,14 +200,19 @@ const [loadvar, setLoadvar] = useState(0);
     setLoading(true);
 
     try {
-      const success = await deleteRequestDocument(requestId, rowId, bulkdataId, myId);
+      const success = await deleteRequestDocument(
+        requestId,
+        rowId,
+        bulkdataId,
+        myId
+      );
       if (success) {
         message.success("Request Deleted Successfully");
         fetchTableContent(); // Re-fetch data after successful delete
       } else {
         message.error("Failed to delete request.");
       }
-    } catch(error) {
+    } catch (error) {
       message.error(String(error));
     } finally {
       setLoading(false);
@@ -215,7 +229,13 @@ const [loadvar, setLoadvar] = useState(0);
     setLoading(true);
 
     try {
-      const success = await rejectRequestDocumentByOfficer(requestId, selectedRowId, bulkdataId, rejectReason, myId);
+      const success = await rejectRequestDocumentByOfficer(
+        requestId,
+        selectedRowId,
+        bulkdataId,
+        rejectReason,
+        myId
+      );
 
       if (success) {
         message.success("Request Rejected Successfully");
@@ -233,7 +253,6 @@ const [loadvar, setLoadvar] = useState(0);
     }
   };
 
-
   const ReqReject = async (rowId: string) => {
     if (requestStatus === "Rejected") {
       message.error("Full Request is already Rejected");
@@ -241,13 +260,17 @@ const [loadvar, setLoadvar] = useState(0);
       setSelectedRowId(rowId);
       setIsRejectModalVisible(true);
     }
-  }
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-5xl mx-auto bg-white shadow-md rounded-xl p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold">{userRole === 'Reader' ? "Reader Document Management" : "Officer Document Management"}</h1>
+          <h1 className="text-2xl font-semibold">
+            {userRole === "Reader"
+              ? "Reader Document Management"
+              : "Officer Document Management"}
+          </h1>
           <div className="space-x-3">
             <input
               type="file"
@@ -256,22 +279,23 @@ const [loadvar, setLoadvar] = useState(0);
               ref={fileInputRef}
               onChange={handleFileChange}
             />
-            {["Reader", "Officer"].includes(userRole ?? "") && requestStatus === "Draft" && (
-              <>
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
-                  onClick={handleBulkUploadClick}
-                >
-                  Bulk Upload (xls, csv)
-                </button>
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
-                  onClick={handleDownloadExcelTemplate}
-                >
-                  Download Template
-                </button>
-              </>
-            )}
+            {["Reader", "Officer"].includes(userRole ?? "") &&
+              requestStatus === "Draft" && (
+                <>
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+                    onClick={handleBulkUploadClick}
+                  >
+                    Bulk Upload (xls, csv)
+                  </button>
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+                    onClick={handleDownloadExcelTemplate}
+                  >
+                    Download Template
+                  </button>
+                </>
+              )}
           </div>
         </div>
 
@@ -310,7 +334,10 @@ const [loadvar, setLoadvar] = useState(0);
                     });
 
                     return (
-                      <tr key={index} className="border-t border-gray-200 hover:bg-gray-50">
+                      <tr
+                        key={index}
+                        className="border-t border-gray-200 hover:bg-gray-50"
+                      >
                         {tablehead.map((header, hIndex) => {
                           const key = header.toLowerCase();
                           return (
@@ -365,7 +392,9 @@ const [loadvar, setLoadvar] = useState(0);
                             <button
                               className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-600"
                               onClick={() =>
-                                message.error("No action allowed. Request already rejected.")
+                                message.error(
+                                  "No action allowed. Request already rejected."
+                                )
                               }
                             >
                               No Action
@@ -375,7 +404,9 @@ const [loadvar, setLoadvar] = useState(0);
                             <>
                               <button
                                 className="bg-blue-500 text-white px-3 py-1 rounded mr-2 hover:bg-blue-600"
-                                onClick={() => PreviewReqData(doc._id as string)}
+                                onClick={() =>
+                                  PreviewReqData(doc._id as string)
+                                }
                               >
                                 Preview
                               </button>
@@ -389,18 +420,20 @@ const [loadvar, setLoadvar] = useState(0);
                               ) : (
                                 <button
                                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                                  onClick={() => ReqReject(doc._id as string)} >
+                                  onClick={() => ReqReject(doc._id as string)}
+                                >
                                   Reject
                                 </button>
                               )}
                             </>
                           )}
-                          {
-                            doc.status==="Pending for Signature"&&(
-                           <>
-                            <button
+                          {doc.status === "Pending for Signature" && (
+                            <>
+                              <button
                                 className="bg-blue-500 text-white px-3 py-1 rounded mr-2 hover:bg-blue-600"
-                                onClick={() => PreviewReqData(doc._id as string)}
+                                onClick={() =>
+                                  PreviewReqData(doc._id as string)
+                                }
                               >
                                 Preview
                               </button>
@@ -409,19 +442,23 @@ const [loadvar, setLoadvar] = useState(0);
                               ) : (
                                 <button
                                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                                  onClick={() => ReqReject(doc._id as string)} >
+                                  onClick={() => ReqReject(doc._id as string)}
+                                >
                                   Reject
                                 </button>
                               )}
-                           </>
-                            )}
+                            </>
+                          )}
                         </td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan={tablehead.length + 3} className="text-center p-4 text-gray-500">
+                    <td
+                      colSpan={tablehead.length + 3}
+                      className="text-center p-4 text-gray-500"
+                    >
                       No data found.
                     </td>
                   </tr>
@@ -431,7 +468,7 @@ const [loadvar, setLoadvar] = useState(0);
           </div>
         </Spin>
       </div>
-      <Modal
+      {/* <Modal
         title="Reject Request"
         open={isRejectModalVisible}
         onCancel={() => {
@@ -449,8 +486,28 @@ const [loadvar, setLoadvar] = useState(0);
           onChange={(e) => setRejectReason(e.target.value)}
           placeholder="Enter rejection reason..."
         />
-      </Modal>
+      </Modal> */}
 
+      <Modal
+        title="Reject Request"
+        open={isRejectModalVisible}
+        onCancel={() => {
+          setIsRejectModalVisible(false);
+          setRejectReason("");
+          setSelectedRowId(null);
+        }}
+        onOk={handleRejectConfirm}
+        okText="Reject"
+        okButtonProps={{ danger: true }}
+      >
+        <p>Please enter the reason for rejecting this request:</p>
+        <Input.TextArea
+          rows={4}
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+          placeholder="Enter rejection reason..."
+        />
+      </Modal>
     </div>
   );
 }
