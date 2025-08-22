@@ -345,7 +345,9 @@ export default function RequestPage() {
                               key={hIndex}
                               className="p-3 whitespace-nowrap border-b border-gray-100"
                             >
-                              {normalizedDoc[key] || "—"}
+                              {normalizedDoc[key] !== undefined && normalizedDoc[key] !== null
+                                ? String(normalizedDoc[key])
+                                : "—"}
                             </td>
                           );
                         })}
@@ -468,7 +470,7 @@ export default function RequestPage() {
           </div>
         </Spin>
       </div>
-      {/* <Modal
+      <Modal
         title="Reject Request"
         open={isRejectModalVisible}
         onCancel={() => {
@@ -486,28 +488,9 @@ export default function RequestPage() {
           onChange={(e) => setRejectReason(e.target.value)}
           placeholder="Enter rejection reason..."
         />
-      </Modal> */}
-
-      <Modal
-        title="Reject Request"
-        open={isRejectModalVisible}
-        onCancel={() => {
-          setIsRejectModalVisible(false);
-          setRejectReason("");
-          setSelectedRowId(null);
-        }}
-        onOk={handleRejectConfirm}
-        okText="Reject"
-        okButtonProps={{ danger: true }}
-      >
-        <p>Please enter the reason for rejecting this request:</p>
-        <Input.TextArea
-          rows={4}
-          value={rejectReason}
-          onChange={(e) => setRejectReason(e.target.value)}
-          placeholder="Enter rejection reason..."
-        />
       </Modal>
+
+      
     </div>
   );
 }
