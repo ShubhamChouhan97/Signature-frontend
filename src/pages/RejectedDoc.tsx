@@ -18,8 +18,6 @@ const RejecedDoc: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [tablehead, setTablehead] = useState<string[]>([]);
   const [tabledata, setTabledata] = useState<RequestDataRow[]>([]);
-  const [requestStatus, setRequestStatus] = useState<string | null>(null);
-  const [bulkdataId, setBulkdataId] = useState<string | null>(null);
 
   const getRequestId = (): string => {
     const pathSegments = location.pathname.split("/");
