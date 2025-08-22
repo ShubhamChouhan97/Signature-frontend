@@ -29,7 +29,7 @@ const RejecedDoc: React.FC = () => {
   const fetchData = async () => {
     const requestId = getRequestId();
     try {
-      const [header, status] = await fetchTableHeadAndStatus(requestId);
+      const [header] = await fetchTableHeadAndStatus(requestId);
       setTablehead(header);
       // setRequestStatus(status);
     } catch {
@@ -40,7 +40,7 @@ const RejecedDoc: React.FC = () => {
   const fetchTableContent = async () => {
     const requestId = getRequestId();
     try {
-      const [tableData, bulkId] = await fetchTableDataAndBulkId(requestId);
+      const [tableData] = await fetchTableDataAndBulkId(requestId);
       // setBulkdataId(bulkId);
       setTabledata(tableData);
     } catch {
