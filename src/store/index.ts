@@ -10,4 +10,4 @@ export const mainClient = new MainClient(backendUrl);
 export const courtClient = new CourtClient(backendUrl);
 export const userClient = new UserClient(backendUrl);
 
-export const useAppStore = createAppStore();
+export const useAppStore = createAppStore(mainClient);
