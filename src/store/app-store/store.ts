@@ -61,12 +61,14 @@ import { rolesMap } from "../../libs/statusMap";
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 interface Session {
-	id: string;
-	email:string;
+	
 	userId: string;
 	role: number;
-	// extend with more fields returned by your backend
-}
+	email: string;
+	phoneNumber: string;
+	name: string;
+};
+
 
 interface TestStoreState {
 	session: Session | null;
