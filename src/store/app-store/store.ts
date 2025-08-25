@@ -80,39 +80,57 @@ interface TestStoreState {
 	setMessageInstance: (_message: MessageInstance) => void;
 }
 
-export const useAppStore = create<TestStoreState>()(
-	immer((set, get) => ({
+export const createAppStore = () => {
+	const initialValues: TestStoreState = {
 		session: null,
 		appLoading: false,
 		messageInstance: null,
-		async init() {
-			try {
-				const res = await fetch(`${backendUrl}/session`, {
-					method: "GET",
-					credentials: "include",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				});
-				if (!res.ok) throw new Error("Failed to fetch session");
-				const session: Session = await res.json();
-				set({ session });
-			} catch (err) {
-				console.error("Session fetch error:", err);
-				set({ session: null });
-			}
-		},
-		setAppLoading(state) {
-			set((appState) => {
-				appState.appLoading = state;
-			});
-		},
-		setMessageInstance(instance) {
-			if (get().messageInstance) return;
-			set((appStore) => {
-				appStore.messageInstance = instance;
-			});
-		},
+		init: async () => {},
+		setAppLoading: () => {},
+		setMessageInstance: () => {},
 		getRole: (role: number) => rolesMap[role as keyof typeof rolesMap],
-	}))
-);
+	};
+
+	return create<TestStoreState>()(
+		immer((set, get) => ({
+			...initialValues,
+			async init() {
+				try {
+					const res = await fetch(`${backendUrl}/session`, {
+						method: "GET",
+						credentials: "include", // send cookies with request
+						headers: {
+							"Content-Type": "application/json",
+						},
+					});
+
+					if (!res.ok) {
+						throw new Error("Failed to fetch session");
+					}
+
+					const session: Session = await res.json();
+
+					set({ session });
+				} catch (err) {
+					console.error("Session fetch error:", err);
+					set({ session: null });
+				}
+			},
+			setAppLoading(state) {
+				set((appState) => {
+					appState.appLoading = state;
+					return appState;
+				});
+			},
+			setMessageInstance(instance) {
+				if (get().messageInstance) {
+					return;
+				}
+				set((appStore) => {
+					appStore.messageInstance = instance;
+					return appStore;
+				});
+			},
+		}))
+	);
+};
