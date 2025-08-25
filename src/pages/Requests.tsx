@@ -943,8 +943,8 @@ import {
   DispatchRequest,
   dispatchNumberFind,
 } from '../Api/requestsApi';
-
-const socket = io("https://signature-backend-79t1.onrender.com", {
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const socket = io(backendUrl, {
   withCredentials: true
 });
 

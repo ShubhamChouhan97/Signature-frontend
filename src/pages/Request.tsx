@@ -17,8 +17,8 @@ import {
   deleteRequestDocument,
   rejectRequestDocumentByOfficer,
 } from "../Api/requestPageApi"; // Adjust path as needed
-
-const socket = io("https://signature-backend-79t1.onrender.com", {
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const socket = io(backendUrl, {
   withCredentials: true,
 });
 
